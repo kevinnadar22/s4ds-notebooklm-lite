@@ -23,3 +23,11 @@ dependencies = [
 
 [project.scripts]
 s4ds-notebooklm-lite = "main:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+# Flat app: only these .py modules are the package (not static/ or templates/)
+[tool.setuptools]
+py-modules = ["main", "rag", "db", "voice"]
