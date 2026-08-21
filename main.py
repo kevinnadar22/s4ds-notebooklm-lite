@@ -113,6 +113,37 @@ def get_documents() -> dict:
     return {"documents": db.list_documents()}
 
 
+@app.delete("/documents/{doc_id}")
+def remove_document(doc_id: int) -> dict:
+    """Delete a PDF from the library, disk, and Chroma index."""
+    doc = db.get_document(doc_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="document not found")
+
+    filename = doc["filename"]
+    removed_chunks = 0
+    try:
+        removed_chunks = rag.delete_pdf_chunks(filename)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(
+            status_code=500, detail=f"failed to remove vectors: {exc}"
+        ) from exc
+
+    path = UPLOAD_DIR / Path(filename).name
+    if path.is_file():
+        try:
+            path.unlink()
+        except OSError:
+            pass
+
+    deleted = db.delete_document(doc_id)
+    return {
+        "ok": True,
+        "document": deleted,
+        "removed_chunks": removed_chunks,
+    }
+
+
 @app.post("/sessions")
 def create_session(body: SessionCreate) -> dict:
     try:

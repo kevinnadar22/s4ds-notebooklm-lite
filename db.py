@@ -98,3 +98,21 @@ def list_documents() -> list[dict]:
     with Session(engine) as s:
         rows = s.exec(select(Document).order_by(Document.id.desc())).all()
         return [r.model_dump() for r in rows]
+
+
+def get_document(doc_id: int) -> dict | None:
+    with Session(engine) as s:
+        row = s.get(Document, doc_id)
+        return row.model_dump() if row else None
+
+
+def delete_document(doc_id: int) -> dict | None:
+    """Remove a document row. Returns the deleted row, or None if missing."""
+    with Session(engine) as s:
+        row = s.get(Document, doc_id)
+        if not row:
+            return None
+        data = row.model_dump()
+        s.delete(row)
+        s.commit()
+        return data

@@ -105,6 +105,21 @@ def ingest_pdf(path: str | Path) -> int:
     return len(chunks)
 
 
+def delete_pdf_chunks(filename: str) -> int:
+    """Remove all Chroma chunks whose metadata source matches filename."""
+    store = _vectorstore()
+    collection = store._collection
+    try:
+        existing = collection.get(where={"source": filename})
+    except Exception:  # noqa: BLE001
+        return 0
+    ids = existing.get("ids") or []
+    if not ids:
+        return 0
+    collection.delete(ids=ids)
+    return len(ids)
+
+
 def retrieve(question: str, k: int = TOP_K) -> list[dict]:
     """Return top-k chunks with distance + relevance scores for the UI."""
     try:

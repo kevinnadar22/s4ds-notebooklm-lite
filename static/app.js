@@ -249,10 +249,34 @@ function renderDocsPanel(docs) {
               ${d.created_at ? `<br>${escapeHtml(formatWhen(d.created_at))}` : ""}
             </p>
           </div>
+          <button type="button" class="doc-delete h-8 w-8 shrink-0 rounded-lg border border-border grid place-items-center text-muted-foreground hover:text-destructive hover:bg-accent transition" data-id="${d.id}" data-name="${escapeHtml(d.filename)}" title="Delete PDF" aria-label="Delete ${escapeHtml(d.filename)}">
+            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M3 6h18M8 6V4h8v2m-1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/>
+            </svg>
+          </button>
         </div>
       </article>`
     )
     .join("");
+
+  list.querySelectorAll(".doc-delete").forEach((btn) => {
+    btn.addEventListener("click", () => deleteDocument(btn.dataset.id, btn.dataset.name));
+  });
+}
+
+async function deleteDocument(id, name) {
+  if (!id || state.uploading || state.voiceOpen) return;
+  const label = name || "this PDF";
+  if (!window.confirm(`Delete ${label}? This removes it from the library and search index.`)) {
+    return;
+  }
+  try {
+    await api(`/documents/${id}`, { method: "DELETE" });
+    await loadDocuments();
+    $("upload-status").textContent = `Deleted ${label}`;
+  } catch (err) {
+    $("upload-status").textContent = err.message || "Delete failed";
+  }
 }
 
 async function loadDocuments() {
