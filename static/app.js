@@ -250,8 +250,12 @@ function renderDocsPanel(docs) {
             </p>
           </div>
           <button type="button" class="doc-delete h-8 w-8 shrink-0 rounded-lg border border-border grid place-items-center text-muted-foreground hover:text-destructive hover:bg-accent transition" data-id="${d.id}" data-name="${escapeHtml(d.filename)}" title="Delete PDF" aria-label="Delete ${escapeHtml(d.filename)}">
-            <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path d="M3 6h18M8 6V4h8v2m-1 0v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 6h18"/>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+              <line x1="10" x2="10" y1="11" y2="17"/>
+              <line x1="14" x2="14" y1="11" y2="17"/>
             </svg>
           </button>
         </div>
