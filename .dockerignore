@@ -1,0 +1,11 @@
+.git
+.venv
+node_modules
+__pycache__
+.cursor
+.env
+uploads
+chroma_db
+data
+*.pyc
+.Python

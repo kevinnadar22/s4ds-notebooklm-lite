@@ -1,0 +1,25 @@
+[project]
+name = "s4ds-notebooklm-lite"
+version = "0.1.0"
+description = "Minimal NotebookLM-lite: PDF RAG chat with Gemini, Chroma, and voice"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "python-multipart",
+    "langchain",
+    "langchain-google-genai",
+    "langchain-chroma",
+    "langchain-community",
+    "langchain-text-splitters",
+    "chromadb",
+    "pypdf",
+    "edge-tts",
+    "python-dotenv",
+    "sqlmodel>=0.0.39",
+    "jinja2>=3.1.6",
+]
+
+[project.scripts]
+s4ds-notebooklm-lite = "main:main"
