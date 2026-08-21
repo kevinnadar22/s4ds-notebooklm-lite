@@ -51,12 +51,27 @@ def transcribe(audio_bytes: bytes, mime: str = "audio/webm") -> str:
 
 async def speak_async(text: str, voice: str = DEFAULT_VOICE) -> bytes:
     """Async TTS — use this from FastAPI async routes."""
-    communicate = edge_tts.Communicate(text, voice)
+    # edge-tts is plain speech; strip markdown-ish noise that can yield empty/odd audio
+    clean = (
+        (text or "")
+        .replace("**", "")
+        .replace("__", "")
+        .replace("`", "")
+        .replace("#", "")
+        .strip()
+    )
+    if not clean:
+        raise ValueError("nothing to speak")
+
+    communicate = edge_tts.Communicate(clean, voice)
     chunks: list[bytes] = []
     async for chunk in communicate.stream():
         if chunk["type"] == "audio":
             chunks.append(chunk["data"])
-    return b"".join(chunks)
+    audio = b"".join(chunks)
+    if not audio:
+        raise ValueError("edge-tts returned empty audio (network / voice blocked?)")
+    return audio
 
 
 def speak(text: str, voice: str = DEFAULT_VOICE) -> bytes:

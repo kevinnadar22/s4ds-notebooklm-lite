@@ -610,16 +610,41 @@ async function handleVoiceUtterance(blob) {
 
     if (data.audio_base64) {
       setVoiceUi("speaking");
-      const bytes = Uint8Array.from(atob(data.audio_base64), (c) => c.charCodeAt(0));
-      const url = URL.createObjectURL(
-        new Blob([bytes], { type: data.audio_mime || "audio/mpeg" })
-      );
-      await new Promise((resolve) => {
-        const audio = new Audio(url);
-        audio.onended = resolve;
-        audio.onerror = resolve;
-        audio.play().catch(resolve);
-      });
+      try {
+        const bytes = Uint8Array.from(atob(data.audio_base64), (c) => c.charCodeAt(0));
+        if (!bytes.length) throw new Error("empty audio from server");
+        const url = URL.createObjectURL(
+          new Blob([bytes], { type: data.audio_mime || "audio/mpeg" })
+        );
+        await new Promise((resolve, reject) => {
+          const audio = new Audio(url);
+          audio.onended = () => {
+            URL.revokeObjectURL(url);
+            resolve();
+          };
+          audio.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("browser could not play TTS audio"));
+          };
+          // User just tapped ✓ — that gesture should allow play(); still surface failures
+          audio.play().catch((err) => {
+            URL.revokeObjectURL(url);
+            reject(
+              new Error(
+                err?.name === "NotAllowedError"
+                  ? "Browser blocked audio — click the page once, then try again"
+                  : err?.message || "audio play failed"
+              )
+            );
+          });
+        });
+      } catch (playErr) {
+        setVoicePhase(playErr.message || "Could not speak reply");
+        await new Promise((r) => setTimeout(r, 1600));
+      }
+    } else {
+      setVoicePhase("Reply ready, but no speech audio returned");
+      await new Promise((r) => setTimeout(r, 1200));
     }
   } catch (err) {
     setVoicePhase(err.message);
